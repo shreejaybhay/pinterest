@@ -10,6 +10,15 @@ const SignUp = () => {
         email: "",
         password: "",
         age: "",
+        profilePicture: "https://flowbite.com/docs/images/examples/image-2@2x.jpg",
+        coverPicture: "https://flowbite.com/docs/images/examples/image-1@2x.jpg",
+        name: "",
+        bio: "",
+        website: "",
+        followers: [],
+        following: [],
+        savedPins: [],
+        posts: [],
     });
     const [errors, setErrors] = useState({});
     const [generalError, setGeneralError] = useState("");
@@ -28,24 +37,39 @@ const SignUp = () => {
 
         if (Object.keys(validationErrors).length === 0) {
             try {
-                const response = await fetch('/api/signup', {
+                // Convert date to age
+                const ageDate = new Date(age);
+                const currentYear = new Date().getFullYear();
+                const ageNumber = currentYear - ageDate.getFullYear();
+
+                const formDataWithAge = { ...formData, age: ageNumber };
+
+                const response = await fetch('/api/auth/users', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formDataWithAge)
                 });
 
                 if (!response.ok) {
-                    throw new Error('Something went wrong');
-                }
+                    const errorData = await response.json();
 
-                router.push('/login');
+                    if (errorData.message.includes("duplicate key error")) {
+                        setGeneralError("Username already taken. Please choose another.");
+                    } else {
+                        throw new Error(errorData.message || 'Something went wrong');
+                    }
+                } else {
+                    router.push('/login');
+                }
             } catch (error) {
                 setGeneralError(error.message);
             }
         }
     };
+
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;

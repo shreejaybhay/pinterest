@@ -3,6 +3,17 @@ import followModel from "@/models/follow.model";
 import { User } from "@/models/user.model";
 import { NextResponse } from "next/server";
 
+
+export async function GET(request) {
+    try {
+        await connectDB();
+        const follow = await followModel.find()
+        return NextResponse.json(follow, { message: "OK" }, { status: 200 });
+    } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
 export async function POST(request) {
     try {
         await connectDB();
@@ -42,5 +53,33 @@ export async function POST(request) {
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(request) {
+    try {
+        // Connect to the database
+        await connectDB();
+
+        // Parse the request body
+        const { userId } = await request.json();
+
+        // Delete all documents where the userId is in either 'follower' or 'following'
+        const result = await followModel.deleteMany({
+            $or: [
+                { follower: userId },
+                { following: userId }
+            ]
+        });
+
+        if (result.deletedCount > 0) {
+            return NextResponse.json({ message: 'Documents deleted successfully.' }, { status: 200 });
+        } else {
+            return NextResponse.json({ message: 'No documents found for the provided userId.' }, { status: 404 });
+        }
+    } catch (error) {
+        // Handle errors
+        console.error('Error handling DELETE request:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

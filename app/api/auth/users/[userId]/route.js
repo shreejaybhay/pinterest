@@ -1,6 +1,13 @@
-import { User } from "@/models/user.model";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { User } from "@/models/user.model";
+import pinModel from "@/models/pin.model";
+import { Save } from "@/models/save.model";
+import commentModel from "@/models/comment.model";
+import followModel from "@/models/follow.model";
+import likeModels from "@/models/like.models";
+import boardModel from "@/models/board.model";
+import messageModel from "@/models/message.model";
 
 export async function GET(request, { params }) {
     const { userId } = params;
@@ -9,7 +16,21 @@ export async function GET(request, { params }) {
         if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
-        return NextResponse.json(user);
+
+        // Fetch saved pins
+        const savedPins = await Save.findOne({ user: userId }).populate('pins');
+        const userWithPins = {
+            ...user.toObject(),
+            savedPins: savedPins ? savedPins.pins : []
+        };
+
+        // Fetch full pin details
+        const pinsByUserId = await pinModel.find({ user: userId }).lean(); // Fetch full pin objects
+
+        // Add the full pin details to the user object
+        userWithPins.posts = pinsByUserId;
+
+        return NextResponse.json(userWithPins);
     } catch (error) {
         return NextResponse.json({ message: "Error fetching user", success: false }, { status: 500 });
     }
@@ -34,8 +55,35 @@ export async function DELETE(request, { params }) {
             return NextResponse.json({ message: 'Invalid password' }, { status: 401 });
         }
 
+        // Delete all posts associated with the user
+        await pinModel.deleteMany({ user: userId });
+
+        // Delete saved pins associated with the user
+        await Save.deleteOne({ user: userId });
+
+        //delete all comments associated with the user
+        await commentModel.deleteMany({ user: userId });
+
+        // delete all likes associated with the user
+        await likeModels.deleteMany({ user: userId });
+
+        //delete all boards associated with the user
+        await boardModel.deleteMany({ user: userId });
+
+        //delete all messages associated with the user
+        await messageModel.deleteMany({ user: userId });
+
+        // Optionally, delete the user from any follow relationships
+        await followModel.deleteMany({
+            $or: [
+                { follower: userId },
+                { following: userId }
+            ]
+        });
+
         await User.deleteOne({ _id: userId });
-        console.log("User deleted successfully:", userId);
+
+        console.log("User and all associated data deleted successfully:", userId);
         return NextResponse.json({ message: 'User deleted successfully' }, { status: 204 });
     } catch (error) {
         console.error("Error deleting user:", error);

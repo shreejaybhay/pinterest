@@ -1,20 +1,31 @@
-// pages/api/comments.js
+import mongoose from 'mongoose';
+import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import commentModel from '@/models/comment.model';
 import pinModel from '@/models/pin.model';
-import { NextResponse } from 'next/server';
 
 export async function GET(request) {
     try {
         const url = new URL(request.url);
+        const userId = url.searchParams.get('userId');
         const pinId = url.searchParams.get('pinId');
 
-        if (!pinId) {
-            return NextResponse.json({ error: 'Pin ID is required' }, { status: 400 });
+        if (!userId && !pinId) {
+            return NextResponse.json({ error: 'Either userId or pinId is required' }, { status: 400 });
         }
 
         await connectDB();
-        const comments = await commentModel.find({ pin: pinId }).populate('user', 'username profilePicture');
+
+        // Create filter based on the presence of userId or pinId
+        const filter = {};
+        if (userId) {
+            filter.user = userId;
+        }
+        if (pinId) {
+            filter.pin = pinId;
+        }
+
+        const comments = await commentModel.find(filter).populate('user', 'username profilePicture').populate('pin', 'title description'); // Adjust fields as needed
 
         return NextResponse.json({ comments }, { status: 200 });
     } catch (error) {
@@ -36,7 +47,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 });
         }
         const updatedPin = await pinModel.findByIdAndUpdate(pinId, {
-            $push: { comments: newComment._id },
+            $push: { comments: newComment.user._id },
         }, { new: true });
 
         if (!updatedPin) {
@@ -71,28 +82,57 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
     try {
-        const { commentId } = await request.json();
+        const { commentId, userId } = await request.json();
 
-        if (!commentId) {
-            return NextResponse.json({ error: 'Comment ID is required' }, { status: 400 });
+        if (!commentId && !userId) {
+            return NextResponse.json({ error: 'Either Comment ID or User ID is required' }, { status: 400 });
         }
 
         await connectDB();
-        const comment = await commentModel.findById(commentId);
 
-        if (!comment) {
-            return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
+        if (commentId) {
+            // Handle deletion by commentId
+            const comment = await commentModel.findById(commentId);
+            if (!comment) {
+                return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
+            }
+
+            // Remove the comment from the pin's comments array
+            await pinModel.findByIdAndUpdate(comment.pin, {
+                $pull: { comments: commentId }
+            });
+
+            // Delete the comment
+            await commentModel.findByIdAndDelete(commentId);
+
+            return NextResponse.json({ message: 'Comment deleted successfully' }, { status: 200 });
         }
 
-        // Remove the comment from the pin's comments array
-        await pinModel.findByIdAndUpdate(comment.pin, {
-            $pull: { comments: commentId }
-        });
+        else if (userId) {
+            // Ensure userId is in ObjectId format
+            if (!mongoose.Types.ObjectId.isValid(userId)) {
+                return NextResponse.json({ error: 'Invalid User ID format' }, { status: 400 });
+            }
 
-        // Delete the comment
-        await commentModel.findByIdAndDelete(commentId);
+            // Find and delete comments by userId
+            const comments = await commentModel.find({ user: userId }).exec();
 
-        return NextResponse.json({ message: 'Comment deleted successfully' }, { status: 200 });
+            if (comments.length === 0) {
+                return NextResponse.json({ error: 'No comments found for the user' }, { status: 404 });
+            }
+
+            for (const comment of comments) {
+                // Remove the comment from the pin's comments array
+                await pinModel.findByIdAndUpdate(comment.pin, {
+                    $pull: { comments: comment._id }
+                });
+
+                // Delete the comment
+                await commentModel.findByIdAndDelete(comment._id);
+            }
+
+            return NextResponse.json({ message: 'All comments by the user deleted successfully' }, { status: 200 });
+        }
     } catch (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

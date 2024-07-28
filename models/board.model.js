@@ -7,4 +7,9 @@ const BoardSchema = new Schema({
     pins: [{ type: Schema.Types.ObjectId, ref: 'Pin' }],
 }, { timestamps: true });
 
+BoardSchema.pre('remove', async function (next) {
+    await mongoose.model('Pin').deleteMany({ board: this._id });
+    next();
+});
+
 export default mongoose.models.Board || mongoose.model('Board', BoardSchema);

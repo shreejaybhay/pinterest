@@ -11,4 +11,10 @@ const PinSchema = new Schema({
     board: { type: Schema.Types.ObjectId, ref: 'Board' },
 }, { timestamps: true });
 
+PinSchema.pre('remove', async function (next) {
+    await mongoose.model('Comment').deleteMany({ pin: this._id });
+    await mongoose.model('Like').deleteMany({ pin: this._id });
+    next();
+});
+
 export default mongoose.models.Pin || mongoose.model('Pin', PinSchema);

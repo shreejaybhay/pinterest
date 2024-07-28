@@ -69,12 +69,48 @@
 }
 
 /* Hide scrollbar for WebKit browsers */
-.scrollbar-hidden::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
 /* Hide scrollbar for Firefox */
-.scrollbar-hidden {
+.scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+/* styles.css */
+.grid-cols-custom {
+  display: grid;
+  gap: 1rem; /* Adjust the gap as needed */
+}
+
+@media (max-width: 350px) {
+  .grid-cols-custom {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 351px) and (max-width: 750px) {
+  .grid-cols-custom {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 751px) and (max-width: 900px) {
+  .grid-cols-custom {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1201px) and (max-width: 1600px) {
+  .grid-cols-custom {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 1601px) {
+  .grid-cols-custom {
+    grid-template-columns: repeat(7, 1fr);
+  }
 }
