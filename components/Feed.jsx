@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 const LoadingSkeleton = () => {
   const height = `${Math.floor(Math.random() * (400 - 200 + 1)) + 200}px`;
@@ -235,13 +234,11 @@ const Feed = () => {
                   <div className="relative overflow-hidden rounded-lg shadow-md group">
                     <Link href={`/pin/${pin._id}`}>
                       <LazyLoad height={300} offset={100}>
-                        <Image
+                        <img
                           src={pin.imageURL}
                           alt={pin.title}
                           className="object-cover w-full h-auto transition duration-300 ease-in-out group-hover:brightness-50"
                           loading="lazy"
-                          width={300}
-                          height={500}
                         />
                       </LazyLoad>
                     </Link>
@@ -336,13 +333,11 @@ const Feed = () => {
                   <div className="flex items-center justify-between w-full gap-3 px-4 py-2 text-sm text-gray-500">
                     <div className="flex items-center space-x-2">
                       <LazyLoad height={30} offset={100}>
-                        <Image
+                        <img
                           className="object-cover w-6 h-6 rounded-full"
                           src={pin.user?.profilePicture}
                           alt={pin.user?.username || "Profile"}
                           loading="lazy"
-                          width={300}
-                          height={400}
                         />
                       </LazyLoad>
                       <span>{pin.user?.username || "Anonymous"}</span>
@@ -356,13 +351,11 @@ const Feed = () => {
                   <div className="relative overflow-hidden rounded-lg shadow-md group">
                     <Link href={`/pin/${pin._id}`}>
                       <LazyLoad height={300} offset={100}>
-                        <Image
+                        <img
                           src={pin.imageURL}
                           alt={pin.title}
                           className="object-cover w-full h-auto transition duration-300 ease-in-out group-hover:brightness-50"
                           loading="lazy"
-                          width={300}
-                          height={500}
                         />
                       </LazyLoad>
                     </Link>
@@ -457,13 +450,11 @@ const Feed = () => {
                   <div className="flex items-center justify-between w-full gap-3 px-4 py-2 text-sm text-gray-500">
                     <div className="flex items-center space-x-2">
                       <LazyLoad height={30} offset={100}>
-                        <Image
+                        <img
                           className="object-cover w-6 h-6 rounded-full"
                           src={pin.user?.profilePicture}
                           alt={pin.user?.username || "Profile"}
                           loading="lazy"
-                          width={24}
-                          height={24}
                         />
                       </LazyLoad>
                       <span>{pin.user?.username || "Anonymous"}</span>

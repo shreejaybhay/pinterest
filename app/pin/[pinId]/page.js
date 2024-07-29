@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import PinDetailsLoading from './loading';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 const PinDetails = () => {
     const [pin, setPin] = useState(null);
@@ -367,17 +366,7 @@ const PinDetails = () => {
                     <div className="container w-full h-full max-w-4xl p-4 mx-auto md:justify-center md:items-center md:flex">
                         <div className="flex flex-col my-10 overflow-hidden bg-white rounded-lg shadow-lg md:flex-row md:space-x-8">
                             <div className="flex flex-col items-center md:w-1/2">
-                                <div className="relative w-full max-w-[600px]"> {/* Limit the width of the image container */}
-                                    <Image
-                                        src={pin.imageURL}
-                                        alt={pin.title}
-                                        layout="responsive"
-                                        width={600} // Change these values to match the aspect ratio of your images
-                                        height={800} // Change these values to match the aspect ratio of your images
-                                        className="object-cover w-full h-full"
-                                        loading="lazy"
-                                    />
-                                </div>
+                                <img src={pin.imageURL} alt={pin.title} className="object-cover w-full h-full max-h-[800px]" />
                             </div>
                             <div className="flex flex-col justify-between p-6 md:w-1/2">
                                 <div>
@@ -431,7 +420,7 @@ const PinDetails = () => {
                                         </div>
                                     </div>
                                     <h1 className="mb-4 text-3xl font-bold text-gray-800">{pin.title}</h1>
-                                    <p className={` text-gray-600 text-sm ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>{pin.description}</p>
+                                    <p className={` text-lg text-gray-600 ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>{pin.description}</p>
                                     <button
                                         onClick={toggleExpand}
                                         className='mb-5 font-medium text-black hover:underline'
@@ -470,7 +459,7 @@ const PinDetails = () => {
                                                         <div className='flex items-center justify-between'>
                                                             <div className='flex items-center gap-1'>
                                                                 <div className='overflow-hidden rounded-full w-7 h-7'>
-                                                                    <Image src={comment?.user?.profilePicture} alt="" />
+                                                                    <img src={comment?.user?.profilePicture} alt="" />
                                                                 </div>
                                                                 <div className='flex items-center gap-2'>
                                                                     <h1>{comment?.user?.username}</h1>
@@ -539,16 +528,14 @@ const PinDetails = () => {
                                         <h1>{commentsCount} Comments</h1>
                                         <div className='flex items-center gap-2'>
                                             <div className='flex items-center gap-1'>
-                                                <Image width={16} height={16} className='w-4 h-4' src="https://s.pinimg.com/webapp/loveStatic-31fc2a99.svg" alt="Like Count" />
+                                                <img className='w-4 h-4' src="https://s.pinimg.com/webapp/loveStatic-31fc2a99.svg" alt="Like Count" />
                                                 <h1>{pin.likes.length}</h1>
                                             </div>
                                             <button
                                                 onClick={toggleLike}
                                                 className={`px-3 py-3 border rounded-full ${isCurrentUserLikingPin ? 'border-gray-300' : 'bg-transparent border-gray-300 text-gray-600'}`}
                                             >
-                                                <Image
-                                                    width={24}
-                                                    height={24}
+                                                <img
                                                     src={isCurrentUserLikingPin ? "https://s.pinimg.com/webapp/loveStatic-31fc2a99.svg" : "https://s.pinimg.com/webapp/reactionHeartOutline-24ab75a6.svg"}
                                                     alt="Like/Unlike"
                                                     className="w-6 h-6" // Adjust size if necessary
@@ -558,7 +545,7 @@ const PinDetails = () => {
                                     </div>
                                     <div className='flex items-center gap-3 mt-2'>
                                         <Link href='/profile' className='flex-shrink-0 w-12 h-12 overflow-hidden bg-red-500 rounded-full'>
-                                            <Image width={100} height={100} src={currentUser.profilePicture} alt="" className="object-cover w-full h-full" />
+                                            <img src={currentUser.profilePicture} alt="" className="object-cover w-full h-full" />
                                         </Link>
                                         <div className='flex items-center w-full p-1 border border-gray-300 rounded-md focus-within:border-blue-500'>
                                             <input
